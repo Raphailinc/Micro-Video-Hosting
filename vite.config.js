@@ -4,10 +4,13 @@ import { sveltekit } from '@sveltejs/kit/vite';
 const config = {
   plugins: [sveltekit()],
   server: {
-    port: 3000,
+    port: 5173,
   },
   test: {
-    include: ['src/**/*.{test,spec}.{js,ts}'],
+    include: [
+      'src/**/*.{test,spec}.{js,ts}',
+      'tests/**/*.{test,spec}.{js,ts}',
+    ],
     environment: 'jsdom',
     globals: true,
     coverage: {

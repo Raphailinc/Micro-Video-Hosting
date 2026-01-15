@@ -1,10 +1,23 @@
-import db from '../../../../database.js';
+import {
+  fetchTagsForVideo,
+  getVideoById,
+} from '$lib/server/video-store.js';
 
-export async function GET(request) {
+export async function GET({ params }) {
   try {
-    const { id } = request.params;
+    const { id } = params;
+    const video = await getVideoById(id);
 
-    const videoTags = await getVideoTags(id);
+    if (!video) {
+      return new Response(JSON.stringify({ error: 'Video not found' }), {
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
+    const videoTags = await fetchTagsForVideo(id);
 
     return new Response(JSON.stringify({ tags: videoTags }), {
       status: 200,
@@ -21,24 +34,4 @@ export async function GET(request) {
       },
     });
   }
-}
-
-async function getVideoTags(videoId) {
-  const rows = await dbAll(
-    'SELECT tags.name FROM tags INNER JOIN video_tags ON tags.id = video_tags.tag_id WHERE video_tags.video_id = ?',
-    [videoId]
-  );
-  return rows.map((row) => row.name.trim());
-}
-
-function dbAll(query, params) {
-  return new Promise((resolve, reject) => {
-    db.all(query, params, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
 }

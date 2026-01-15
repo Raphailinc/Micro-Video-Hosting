@@ -14,34 +14,81 @@
   let videoFile = null;
   let availableTags = [];
 
+  const normalizeTagList = (tags) =>
+    Array.from(
+      new Set(
+        (Array.isArray(tags)
+          ? tags
+          : typeof tags === 'string'
+            ? tags.split(',')
+            : []
+        )
+          .map((tag) => `${tag ?? ''}`.trim())
+          .filter(Boolean)
+      )
+    );
+
   const handleSubmit = async () => {
-    if (!title.trim() || !videoFile) {
-      console.error('Поля "Название" и "Видеофайл" должны быть заполнены');
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      console.error('Поле "Название" должно быть заполнено');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    selectedTags.forEach((tag) => formData.append('tags[]', tag));
-    formData.append('video_file', videoFile);
+    const tags = Array.isArray(selectedTags) ? selectedTags : [];
 
     try {
-      let url = '/api/add-video';
+      let response;
       if (isEditing) {
-        url = `/api/edit_video/${selectedVideoId}`;
-      }
+        if (!selectedVideoId) {
+          throw new Error('Не выбрано видео для редактирования.');
+        }
 
-      const response = await fetch(url, {
-        method: isEditing ? 'PUT' : 'POST',
-        body: formData,
-      });
+        if (videoFile) {
+          const formData = new FormData();
+          formData.append('title', trimmedTitle);
+          formData.append('description', description);
+          tags.forEach((tag) => formData.append('tags[]', tag));
+          formData.append('video_file', videoFile);
+
+          response = await fetch(`/api/edit_video/${selectedVideoId}`, {
+            method: 'PUT',
+            body: formData,
+          });
+        } else {
+          response = await fetch(`/api/edit_video/${selectedVideoId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: trimmedTitle,
+              description,
+              tags,
+            }),
+          });
+        }
+      } else {
+        if (!videoFile) {
+          console.error('Видеофайл обязателен для добавления нового видео');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', trimmedTitle);
+        formData.append('description', description);
+        tags.forEach((tag) => formData.append('tags[]', tag));
+        formData.append('video_file', videoFile);
+
+        response = await fetch('/api/add-video', {
+          method: 'POST',
+          body: formData,
+        });
+      }
 
       if (!response.ok) {
-        throw new Error('Ошибка при сохранении видео');
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Ошибка при сохранении видео');
       }
 
-      console.log('Видео успешно сохранено');
       goto('/');
     } catch (error) {
       console.error('Ошибка при сохранении видео:', error);
@@ -68,6 +115,9 @@
       const response = await fetch('/api/videos');
       const data = await response.json();
       availableVideos = data;
+      if (isEditing && !selectedVideoId && data.length > 0) {
+        selectedVideoId = data[0].id;
+      }
     } catch (error) {
       console.error('Ошибка при загрузке доступных видео:', error);
     }
@@ -76,23 +126,21 @@
   const fetchSelectedVideo = async () => {
     try {
       const response = await fetch(`/api/videos/${selectedVideoId}`);
+      if (!response.ok) {
+        throw new Error('Видео не найдено');
+      }
       selectedVideo = await response.json();
-      title = selectedVideo.title;
-      description = selectedVideo.description;
-      selectedTags = selectedVideo.tags;
-      const responseTags = await fetch(`/api/tags/${selectedVideoId}`);
-      const data = await responseTags.json();
-      const videoTags = data.tags || [];
-      const responseAllTags = await fetch('/api/tags');
-      const allTagsData = await responseAllTags.json();
-      const allTags = allTagsData.tags || [];
+      title = selectedVideo.title ?? '';
+      description = selectedVideo.description ?? '';
+      selectedTags = normalizeTagList(selectedVideo.tags);
 
-      availableTags = allTags
-        .map((tag) => ({
-          name: tag,
-          selected: Array.isArray(videoTags) && videoTags.includes(tag),
-        }))
-        .map((tagObj) => tagObj.name);
+      const responseTags = await fetch(`/api/tags/${selectedVideoId}`);
+      if (responseTags.ok) {
+        const data = await responseTags.json();
+        const videoTags = normalizeTagList(data.tags || []);
+        selectedTags = normalizeTagList([...selectedTags, ...videoTags]);
+        availableTags = normalizeTagList([...(availableTags || []), ...videoTags]);
+      }
     } catch (error) {
       console.error('Ошибка при загрузке выбранного видео:', error);
     }
@@ -100,12 +148,12 @@
 
   onMount(async () => {
     if (initialTags.length) {
-      availableTags = initialTags;
+      availableTags = normalizeTagList(initialTags);
     } else {
       try {
         const response = await fetch('/api/tags');
         const data = await response.json();
-        availableTags = data.tags;
+        availableTags = normalizeTagList(data.tags);
       } catch (error) {
         console.error('Ошибка при загрузке тегов:', error);
       }
@@ -118,6 +166,11 @@
     isEditing = !isEditing;
     if (isEditing) {
       fetchAvailableVideos();
+    } else {
+      selectedVideoId = null;
+      selectedVideo = null;
+      videoFile = null;
+      selectedTags = [];
     }
   };
 

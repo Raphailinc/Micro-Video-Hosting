@@ -1,114 +1,129 @@
-import db from '../../../../database.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { requireAuth } from '$lib/server/auth.js';
+import { HttpError, errorResponse } from '$lib/server/http-error.js';
+import {
+  getVideoById,
+  normalizeTags,
+  replaceVideoTags,
+  updateVideo,
+} from '$lib/server/video-store.js';
+import {
+  UPLOAD_DIR,
+  validateAndPersistFile,
+} from '$lib/server/uploads.js';
 
-export async function PUT(request) {
-  const { id } = request.params;
+export async function PUT(event) {
+  const { id } = event.params;
 
   try {
-    const formData = await request.request.formData();
+    await requireAuth(event.request);
 
-    if (!formData) {
-      throw new Error('Данные формы не были предоставлены.');
-    }
+    const contentType = event.request.headers.get('content-type') || '';
+    let title;
+    let description;
+    let tags;
+    let shouldUpdateTags = false;
+    let videoFile;
 
-    const title = formData.get('title');
-    const description = formData.get('description');
-    const tags = formData.getAll('tags[]');
-    const videoFile = formData.get('video_file');
-
-    let updateQuery = 'UPDATE videos SET';
-    const updateParams = [];
-    if (title) {
-      updateQuery += ' title = ?,';
-      updateParams.push(title);
-    }
-    if (description) {
-      updateQuery += ' description = ?,';
-      updateParams.push(description);
-    }
-    if (videoFile) {
-      const uploadDir = path.relative(process.cwd(), 'static/videos');
-      await fs.mkdir(uploadDir, { recursive: true });
-      const newFileName = `${Date.now()}_${videoFile.name}`;
-      const filePath = path.join(uploadDir, newFileName);
-
-      const buffer = Buffer.from(await videoFile.arrayBuffer());
-
-      await fs.writeFile(filePath, buffer);
-
-      updateQuery += ' video_file = ?,';
-      updateParams.push(newFileName);
-    }
-
-    if (updateParams.length === 0) {
-      throw new Error('Не указаны поля для обновления.');
-    }
-
-    updateQuery = updateQuery.slice(0, -1);
-    updateQuery += ' WHERE id = ?';
-    updateParams.push(id);
-
-    await db.run(updateQuery, updateParams);
-
-    await clearVideoTags(id);
-    for (const tag of tags) {
-      const tagId = await getTagId(tag);
-      await addVideoTag(id, tagId);
-    }
-
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
-  } catch (error) {
-    console.error('Ошибка при обработке PUT запроса:', error);
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      { status: 500 }
-    );
-  }
-}
-
-async function getTagId(tag) {
-  const existingTag = await dbAll('SELECT id FROM tags WHERE name = ?', [tag]);
-  if (existingTag.length > 0) {
-    console.log(`Идентификатор для тега '${tag}': ${existingTag[0].id}`);
-    return existingTag[0].id;
-  } else {
-    console.log(`Тег '${tag}' не найден`);
-    return null;
-  }
-}
-
-async function addVideoTag(videoId, tagId) {
-  await new Promise((resolve, reject) => {
-    db.run(
-      'INSERT INTO video_tags (video_id, tag_id) VALUES (?, ?)',
-      [videoId, tagId],
-      function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          console.log(
-            `Связь между видео ${videoId} и тегом ${tagId} успешно добавлена`
-          );
-          resolve();
+    if (contentType.includes('application/json')) {
+      const body = await event.request.json();
+      if ('title' in body) {
+        title = body.title?.toString().trim();
+        if (!title) {
+          throw new HttpError(400, 'Название не может быть пустым.');
         }
       }
-    );
-  });
-}
-
-async function clearVideoTags(videoId) {
-  await db.run('DELETE FROM video_tags WHERE video_id = ?', [videoId]);
-}
-
-function dbAll(query, params) {
-  return new Promise((resolve, reject) => {
-    db.all(query, params, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
+      if ('description' in body) {
+        description = body.description?.toString().trim() ?? '';
       }
-    });
-  });
+      if ('tags' in body) {
+        if (!Array.isArray(body.tags)) {
+          throw new HttpError(400, 'Поле tags должно быть массивом строк.');
+        }
+        shouldUpdateTags = true;
+        tags = normalizeTags(body.tags);
+      }
+    } else {
+      const formData = await event.request.formData();
+      const rawTitle = formData.get('title');
+      const rawDescription = formData.get('description');
+      title =
+        rawTitle !== null && typeof rawTitle !== 'undefined'
+          ? rawTitle.toString().trim()
+          : undefined;
+      description =
+        rawDescription !== null && typeof rawDescription !== 'undefined'
+          ? rawDescription.toString().trim()
+          : undefined;
+      videoFile = formData.get('video_file');
+      shouldUpdateTags = true;
+      tags = normalizeTags(formData.getAll('tags[]'));
+    }
+
+    if (
+      typeof title === 'undefined' &&
+      typeof description === 'undefined' &&
+      !shouldUpdateTags &&
+      !videoFile
+    ) {
+      throw new HttpError(400, 'Не указаны поля для обновления.');
+    }
+
+    const existingVideo = await getVideoById(id);
+    if (!existingVideo) {
+      throw new HttpError(404, 'Видео не найдено');
+    }
+
+    let newFileName;
+    if (videoFile instanceof File && videoFile.size) {
+      const saved = await validateAndPersistFile(videoFile);
+      newFileName = saved.filename;
+      await deleteOldFile(existingVideo.video_file);
+    }
+
+    const updateFields = {};
+    if (typeof title !== 'undefined') {
+      updateFields.title = title;
+    }
+    if (typeof description !== 'undefined') {
+      updateFields.description = description;
+    }
+    if (typeof newFileName !== 'undefined') {
+      updateFields.video_file = newFileName;
+    }
+
+    if (Object.keys(updateFields).length) {
+      await updateVideo({ id, ...updateFields });
+    }
+
+    if (shouldUpdateTags) {
+      await replaceVideoTags(id, tags ?? []);
+    }
+
+    const updatedVideo = await getVideoById(id);
+
+    return new Response(
+      JSON.stringify({ success: true, video: updatedVideo }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Ошибка при обработке PUT запроса:', error);
+    return errorResponse(error);
+  }
+}
+
+async function deleteOldFile(filename) {
+  if (!filename) {
+    return;
+  }
+
+  const oldPath = path.resolve(process.cwd(), UPLOAD_DIR, filename);
+  try {
+    await fs.unlink(oldPath);
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.warn('Не удалось удалить старый файл видео:', err);
+    }
+  }
 }

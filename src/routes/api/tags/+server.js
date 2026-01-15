@@ -1,12 +1,10 @@
-import { dbAll } from '../../../database.js';
+import { fetchTags } from '$lib/server/video-store.js';
 
 export async function GET() {
   try {
-    const videoTags = await getVideoTags();
-    const tagsFromTagsTable = await getTagsFromTagsTable();
-    const allTags = [...new Set([...videoTags, ...tagsFromTagsTable])];
+    const tags = await fetchTags();
 
-    return new Response(JSON.stringify({ tags: allTags }), {
+    return new Response(JSON.stringify({ tags }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
@@ -21,25 +19,4 @@ export async function GET() {
       },
     });
   }
-}
-
-async function getVideoTags() {
-  const rows = await dbAll('SELECT tags FROM videos');
-  const tags = [];
-  rows.forEach((row) => {
-    if (row.tags) {
-      const videoTags = row.tags.split(',');
-      videoTags.forEach((tag) => {
-        if (!tags.includes(tag.trim())) {
-          tags.push(tag.trim());
-        }
-      });
-    }
-  });
-  return tags;
-}
-
-async function getTagsFromTagsTable() {
-  const rows = await dbAll('SELECT name FROM tags');
-  return rows.map((row) => row.name.trim());
 }

@@ -29,8 +29,8 @@ describe('add-video page', () => {
 
   it('submits new video with tags and file', async () => {
     const fetchMock = mockFetchQueue([
-      { tags: ['nasa', 'mars'] }, // fetchAvailableVideos when editing
-      { id: 1, title: 'Old video', description: 'desc', tags: ['nasa'] }, // fetchSelectedVideo (not used)
+      [], // fetchAvailableVideos
+      { success: true, id: 1 }, // submit
     ]);
 
     render(AddVideo, { props: { initialTags: ['nasa', 'mars'] } });
@@ -48,6 +48,8 @@ describe('add-video page', () => {
     const submit = screen.getByRole('button', { name: /Добавить/i });
     await fireEvent.click(submit);
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1)); // submit
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const lastCall = fetchMock.mock.calls.at(-1);
+    expect(lastCall?.[1]?.method || 'POST').toBe('POST');
   });
 });

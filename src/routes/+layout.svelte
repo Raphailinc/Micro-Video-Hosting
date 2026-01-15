@@ -18,5 +18,5 @@
 <slot />
 
 <style>
-  @import '/static/styles.css';
+  @import '/styles.css';
 </style>

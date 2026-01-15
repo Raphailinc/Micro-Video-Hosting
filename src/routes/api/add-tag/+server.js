@@ -1,14 +1,21 @@
-import db from '../../../database.js';
+import { dbRun } from '../../../database.js';
+import { requireAuth } from '$lib/server/auth.js';
+import { errorResponse, HttpError } from '$lib/server/http-error.js';
 
-export async function POST(request) {
+export async function POST(event) {
   try {
-    const body = await request.request.json();
+    await requireAuth(event.request);
+
+    const body = await event.request.json();
 
     if (!body || !body.tag) {
-      throw new Error('Тег не был предоставлен.');
+      throw new HttpError(400, 'Тег не был предоставлен.');
     }
 
-    const { tag } = body;
+    const tag = body.tag.toString().trim();
+    if (!tag) {
+      throw new HttpError(400, 'Тег не был предоставлен.');
+    }
 
     await addTagToDatabase(tag);
 
@@ -17,28 +24,15 @@ export async function POST(request) {
         success: true,
         message: `Тег "${tag}" успешно добавлен`,
       }),
-      { status: 200 }
+      { status: 201 }
     );
   } catch (error) {
     console.error('Ошибка при добавлении тега:', error);
 
-    return new Response(
-      JSON.stringify({ success: false, error: 'Ошибка при добавлении тега' }),
-      { status: 500 }
-    );
+    return errorResponse(error);
   }
 }
 
 async function addTagToDatabase(tag) {
-  return new Promise((resolve, reject) => {
-    db.run('INSERT INTO tags (name) VALUES (?)', [tag], function (err) {
-      if (err) {
-        console.error('Ошибка при добавлении тега в базу данных:', err);
-        reject(err);
-      } else {
-        console.log(`Тег "${tag}" успешно добавлен в базу данных`);
-        resolve();
-      }
-    });
-  });
+  await dbRun('INSERT OR IGNORE INTO tags (name) VALUES (?)', [tag]);
 }

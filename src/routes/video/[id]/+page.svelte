@@ -8,6 +8,21 @@
   let video = {};
   let pageTitle = '';
   let tags = [];
+  let normalizedBase = '';
+
+  const normalizeTagList = (value) =>
+    Array.from(
+      new Set(
+        (Array.isArray(value)
+          ? value
+          : typeof value === 'string'
+            ? value.split(',')
+            : []
+        )
+          .map((tag) => `${tag ?? ''}`.trim())
+          .filter(Boolean)
+      )
+    );
 
   onMount(async () => {
     try {
@@ -19,14 +34,24 @@
       if (!getData) {
         throw new Error('Видео не найдено');
       }
-      video = getData;
-      tags = getData.tags;
+      video = {
+        ...getData,
+        tags: normalizeTagList(getData.tags),
+      };
+      tags = video.tags;
       setPageTitle();
     } catch (error) {
       console.error('Ошибка при загрузке видео:', error);
       goto('/');
     }
   });
+
+  $: {
+    normalizedBase = (BASE_URL || '').replace(/\/$/, '');
+  }
+
+  const buildVideoUrl = (file) =>
+    normalizedBase ? `${normalizedBase}/videos/${file}` : `/videos/${file}`;
 
   const setPageTitle = () => {
     pageTitle = `${video.title} - Микровидеохостинг`;
@@ -54,7 +79,7 @@
 {#if Object.keys(video).length > 0}
   <div>
     <video controls>
-      <source src="{BASE_URL}/videos/{video.video_file}" type="video/mp4" />
+      <source src="{buildVideoUrl(video.video_file)}" type="video/mp4" />
       <track kind="captions" src="captions.vtt" srclang="en" label="English" />
       Нет доступного видео.
     </video>
@@ -63,8 +88,8 @@
       <p>Описание: {video.description}</p>
       <p>Теги:</p>
       <ul>
-        {#each tags.split(',') as tag}
-          <li>{tag.trim()}</li>
+        {#each tags as tag}
+          <li>{tag}</li>
         {/each}
       </ul>
     </div>

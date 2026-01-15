@@ -1,39 +1,40 @@
-import { dbAll, dbGet } from '../../../../../../database.js';
+import {
+  countVideosByTag,
+  fetchVideosWithTags,
+} from '$lib/server/video-store.js';
+import { HttpError, errorResponse } from '$lib/server/http-error.js';
 
 export async function GET({ params }) {
   const { tag, page, limit } = params;
-  const offset = (Number(page) - 1) * Number(limit);
 
   try {
-    const videos = await dbAll(
-      `SELECT videos.*, GROUP_CONCAT(tags.name) AS tags
-       FROM videos
-       LEFT JOIN video_tags ON videos.id = video_tags.video_id
-       LEFT JOIN tags ON video_tags.tag_id = tags.id
-       WHERE tags.name = ?
-       GROUP BY videos.id
-       LIMIT ? OFFSET ?`,
-      [tag, Number(limit), offset]
-    );
+    const numericLimit = Number(limit);
+    const pageNumber = Number(page);
 
-    const totalRow = await dbGet(
-      `SELECT COUNT(DISTINCT videos.id) as total
-       FROM videos
-       LEFT JOIN video_tags ON videos.id = video_tags.video_id
-       LEFT JOIN tags ON video_tags.tag_id = tags.id
-       WHERE tags.name = ?`,
-      [tag]
-    );
+    if (!Number.isFinite(numericLimit) || numericLimit <= 0) {
+      throw new HttpError(400, 'Некорректное значение limit.');
+    }
+
+    if (!Number.isFinite(pageNumber) || pageNumber <= 0) {
+      throw new HttpError(400, 'Некорректный номер страницы.');
+    }
+
+    const offset = (pageNumber - 1) * numericLimit;
+
+    const videos = await fetchVideosWithTags({
+      tag,
+      limit: numericLimit,
+      offset,
+    });
+
+    const totalVideos = await countVideosByTag(tag);
 
     return new Response(
-      JSON.stringify({ videos, totalVideos: totalRow?.total ?? 0 }),
+      JSON.stringify({ videos, totalVideos }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Ошибка при получении видео по тегу:', error);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return errorResponse(error);
   }
 }

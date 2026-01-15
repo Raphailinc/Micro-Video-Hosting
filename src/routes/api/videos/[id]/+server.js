@@ -1,10 +1,10 @@
-import { dbGet } from '../../../../database.js';
+import { getVideoById } from '$lib/server/video-store.js';
 
-export async function GET(request) {
-  const { id } = request.params;
+export async function GET({ params }) {
+  const { id } = params;
 
   try {
-    const video = await getVideoWithTags(id);
+    const video = await getVideoById(id);
     if (!video) {
       return new Response(JSON.stringify({ error: 'Video not found' }), {
         status: 404,
@@ -29,15 +29,4 @@ export async function GET(request) {
       },
     });
   }
-}
-
-async function getVideoWithTags(id) {
-  return dbGet(
-    `SELECT videos.*, GROUP_CONCAT(tags.name) AS tags
-       FROM videos
-       LEFT JOIN video_tags ON videos.id = video_tags.video_id
-       LEFT JOIN tags ON video_tags.tag_id = tags.id
-       WHERE videos.id = ?`,
-    [id]
-  );
 }
