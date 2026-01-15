@@ -1,11 +1,17 @@
 <script>
   import { onMount } from 'svelte';
 
-  let videos = [];
-  let loading = true;
+  export let initialVideos = [];
+
+  let videos = initialVideos;
+  let loading = initialVideos.length === 0;
   let selectedVideoId = null;
 
   onMount(async () => {
+      if (initialVideos.length) {
+          loading = false;
+          return;
+      }
       try {
           const response = await fetch(`/api/home`);
           const data = await response.json();

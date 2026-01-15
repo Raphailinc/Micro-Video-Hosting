@@ -5,6 +5,9 @@ package-lock.json
 yarn.lock
 .svelte-kit/
 .vite/
+.coverage
+coverage/
+.eslintcache
 .DS_Store
 *.db
 .vscode/
