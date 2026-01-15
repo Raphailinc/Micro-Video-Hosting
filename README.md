@@ -1,6 +1,6 @@
-# Micro Video Hosting (SvelteKit + SQLite)
-
 ![CI](https://github.com/Raphailinc/Micro-Video-Hosting/actions/workflows/ci.yml/badge.svg)
+
+# Micro Video Hosting (SvelteKit + SQLite)
 
 ![Preview](docs/mvh.svg)
 
