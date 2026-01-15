@@ -1,4 +1,4 @@
-import db from '../../../database.js';
+import { dbAll, dbRun } from '../../../database.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -28,26 +28,19 @@ export async function POST(request) {
 
     await fs.writeFile(filePath, buffer);
 
-    const result = await new Promise((resolve, reject) => {
-      db.run(
-        `INSERT INTO videos (title, description, video_file) VALUES (?, ?, ?)`,
-        [title, description, newFileName],
-        function(err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(this);
-          }
-        }
-      );
-    });
+    const result = await dbRun(
+      `INSERT INTO videos (title, description, video_file) VALUES (?, ?, ?)`,
+      [title, description, newFileName]
+    );
 
     if (result) {
       const videoId = result.lastID;
 
       for (const tag of tags) {
-        const tagId = await getTagId(tag);
-        await addVideoTag(videoId, tagId);
+        const tagId = await ensureTag(tag);
+        if (tagId) {
+          await addVideoTag(videoId, tagId);
+        }
       }
     } else {
       console.error('Не удалось получить videoId');
@@ -66,31 +59,20 @@ export async function POST(request) {
   }
 }
 
-async function getTagId(tag) {
-  const existingTag = await dbAll('SELECT id FROM tags WHERE name = ?', [tag]);
-  if (existingTag.length > 0) {
-    console.log(`Идентификатор для тега '${tag}': ${existingTag[0].id}`);
-    return existingTag[0].id;
-  } else {
-    console.log(`Тег '${tag}' не найден`);
-    return null;
+async function ensureTag(tag) {
+  const existing = await dbAll('SELECT id FROM tags WHERE name = ?', [tag]);
+  if (existing.length > 0) {
+    return existing[0].id;
   }
+  const inserted = await dbRun('INSERT INTO tags (name) VALUES (?)', [tag]);
+  return inserted?.lastID ?? null;
 }
 
 async function addVideoTag(videoId, tagId) {
-  await new Promise((resolve, reject) => {
-    db.run('INSERT INTO video_tags (video_id, tag_id) VALUES (?, ?)', [videoId, tagId], function(err) {
-      if (err) {
-        reject(err);
-      } else {
-        console.log(`Связь между видео ${videoId} и тегом ${tagId} успешно добавлена`);
-        resolve();
-      }
-    });
-  });
+  await dbRun('INSERT OR IGNORE INTO video_tags (video_id, tag_id) VALUES (?, ?)', [videoId, tagId]);
 }
 
-export async function GET(request) {
+export async function GET() {
   try {
     const rows = await dbAll('SELECT name FROM tags');
     const tags = rows.map(row => row.name.trim());

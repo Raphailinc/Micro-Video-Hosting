@@ -1,59 +1,39 @@
-import db from '../../../../../../database.js';
+import { dbAll, dbGet } from '../../../../../database.js';
 
-export async function GET(request) {
-  const { tag, page, limit } = request.params;
+export async function GET({ params }) {
+  const { tag, page, limit } = params;
+  const offset = (Number(page) - 1) * Number(limit);
 
   try {
-    const totalCountRows = await dbAll(`
-      SELECT COUNT(*) AS total FROM videos 
-      JOIN video_tags ON videos.id = video_tags.video_id 
-      JOIN tags ON video_tags.tag_id = tags.id 
-      WHERE tags.name = ?
-    `, [tag]);
+    const videos = await dbAll(
+      `SELECT videos.*, GROUP_CONCAT(tags.name) AS tags
+       FROM videos
+       LEFT JOIN video_tags ON videos.id = video_tags.video_id
+       LEFT JOIN tags ON video_tags.tag_id = tags.id
+       WHERE tags.name = ?
+       GROUP BY videos.id
+       LIMIT ? OFFSET ?`,
+      [tag, Number(limit), offset]
+    );
 
-    const totalVideos = totalCountRows[0].total;
+    const totalRow = await dbGet(
+      `SELECT COUNT(DISTINCT videos.id) as total
+       FROM videos
+       LEFT JOIN video_tags ON videos.id = video_tags.video_id
+       LEFT JOIN tags ON video_tags.tag_id = tags.id
+       WHERE tags.name = ?`,
+      [tag]
+    );
 
-    const maxPage = Math.ceil(totalVideos / limit);
-
-    const offset = (page - 1) * limit;
-
-    const rows = await dbAll(`
-      SELECT videos.* FROM videos 
-      JOIN video_tags ON videos.id = video_tags.video_id 
-      JOIN tags ON video_tags.tag_id = tags.id 
-      WHERE tags.name = ?
-      LIMIT ? OFFSET ?
-    `, [tag, limit, offset]);
-    
-    const responseBody = JSON.stringify({ videos: rows, totalVideos });
-    const response = new Response(responseBody, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    return response;
+    return new Response(
+      JSON.stringify({ videos, totalVideos: totalRow?.total ?? 0 }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
-    console.error('Ошибка при запросе видео по тегу:', error);
-    const errorResponse = JSON.stringify({ error: 'Internal Server Error' });
-    const errorResponseObject = new Response(errorResponse, {
+    console.error('Ошибка при получении видео по тегу:', error);
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
-    return errorResponseObject;
   }
-}
-
-async function dbAll(query, params) {
-  return new Promise((resolve, reject) => {
-    db.all(query, params, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {  
-        resolve(rows);
-      }
-    });
-  });
 }

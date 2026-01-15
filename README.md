@@ -1,38 +1,31 @@
-# create-svelte
+# Micro Video Hosting (SvelteKit + SQLite)
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+Мини-хостинг видео на SvelteKit/SQLite: загрузка роликов, теги, просмотр и фильтр по тегам. API на file-based endpoints, хранение в `mydatabase.db`, загрузка файлов в `static/videos`.
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
+## Запуск
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+pnpm install   # или npm/yarn
+cp .env.example .env
+pnpm dev
 ```
 
-## Developing
+По умолчанию база `mydatabase.db` создаётся рядом с проектом. Видео складываются в `static/videos`.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## API/функционал
+- `POST /api/add-video` — загрузка видео (FormData: `title`, `description`, `tags[]`, `video_file`).
+- `GET /api/videos` — все видео с тегами.
+- `GET /api/videos/:id` — карточка с тегами.
+- `GET /api/videos-by-tag/:tag/:page/:limit` — пагинация по тегу.
+- `GET /api/tags` — список всех тегов.
+- `GET /api/home` — последние 6 видео.
 
+## Разработчику
+- База и таблицы создаются автоматически при старте.
+- Настрой `BASE_URL` в `.env` для отдачи файлов (используется на страницах просмотра).
+- Тесты не добавлены (UI/интеграция), но API вынесено в отдельные handlers для упрощения.
+
+## Билд
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm build
+pnpm preview
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.

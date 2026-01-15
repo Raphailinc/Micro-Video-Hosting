@@ -1,5 +1,4 @@
-import db from '../../../database.js';
-import { isDatabaseEmpty } from '../../../check-database.js';
+import { dbAll } from '../../../database.js';
 
 export async function GET(request) {
   try {
@@ -43,16 +42,4 @@ async function getVideoTags() {
 async function getTagsFromTagsTable() {
   const rows = await dbAll('SELECT name FROM tags');
   return rows.map(row => row.name.trim());
-}
-
-function dbAll(query) {
-  return new Promise((resolve, reject) => {
-    db.all(query, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
 }

@@ -1,4 +1,4 @@
-import db from '../../../../database.js';
+import { dbGet } from '../../../../database.js';
 
 export async function GET(request) {
     const { id } = request.params;
@@ -32,21 +32,12 @@ export async function GET(request) {
   }
   
   async function getVideoWithTags(id) {
-    return new Promise((resolve, reject) => {
-      db.get(
-        `SELECT videos.*, GROUP_CONCAT(tags.name) AS tags
-         FROM videos
-         LEFT JOIN video_tags ON videos.id = video_tags.video_id
-         LEFT JOIN tags ON video_tags.tag_id = tags.id
-         WHERE videos.id = ?`,
-        [id],
-        (err, row) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(row);
-          }
-        }
-      );
-    });
+    return dbGet(
+      `SELECT videos.*, GROUP_CONCAT(tags.name) AS tags
+       FROM videos
+       LEFT JOIN video_tags ON videos.id = video_tags.video_id
+       LEFT JOIN tags ON video_tags.tag_id = tags.id
+       WHERE videos.id = ?`,
+      [id]
+    );
   }
