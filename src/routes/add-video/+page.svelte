@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
 
+  export let initialTags = [];
   let isEditing = false;
   let selectedVideoId = null;
   let selectedVideo = null;
@@ -97,12 +98,16 @@
 
 
   onMount(async () => {
-    try {
-      const response = await fetch('/api/tags');
-      const data = await response.json();
-      availableTags = data.tags;
-    } catch (error) {
-      console.error('Ошибка при загрузке тегов:', error);
+    if (initialTags.length) {
+      availableTags = initialTags;
+    } else {
+      try {
+        const response = await fetch('/api/tags');
+        const data = await response.json();
+        availableTags = data.tags;
+      } catch (error) {
+        console.error('Ошибка при загрузке тегов:', error);
+      }
     }
 
     await fetchAvailableVideos();
