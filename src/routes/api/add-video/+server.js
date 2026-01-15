@@ -46,10 +46,7 @@ export async function POST(request) {
       console.error('Не удалось получить videoId');
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200 }
-    );
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
     console.error('Ошибка при обработке POST запроса:', error);
     return new Response(
@@ -69,26 +66,29 @@ async function ensureTag(tag) {
 }
 
 async function addVideoTag(videoId, tagId) {
-  await dbRun('INSERT OR IGNORE INTO video_tags (video_id, tag_id) VALUES (?, ?)', [videoId, tagId]);
+  await dbRun(
+    'INSERT OR IGNORE INTO video_tags (video_id, tag_id) VALUES (?, ?)',
+    [videoId, tagId]
+  );
 }
 
 export async function GET() {
   try {
     const rows = await dbAll('SELECT name FROM tags');
-    const tags = rows.map(row => row.name.trim());
+    const tags = rows.map((row) => row.name.trim());
     return new Response(JSON.stringify({ tags }), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
   } catch (error) {
     console.error('Ошибка при запросе тегов:', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
   }
 }

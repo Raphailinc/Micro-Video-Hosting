@@ -22,7 +22,7 @@ export function renderVideoComponent(videos, BASE_URL) {
         videoHTML += `</div>`;
       }
     });
-    
+
     return videoHTML;
   } else {
     return `<p>Нет видео по выбранному тегу.</p>`;

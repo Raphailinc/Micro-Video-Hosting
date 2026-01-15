@@ -13,7 +13,10 @@ export async function POST(request) {
     await addTagToDatabase(tag);
 
     return new Response(
-      JSON.stringify({ success: true, message: `Тег "${tag}" успешно добавлен` }),
+      JSON.stringify({
+        success: true,
+        message: `Тег "${tag}" успешно добавлен`,
+      }),
       { status: 200 }
     );
   } catch (error) {
@@ -28,18 +31,14 @@ export async function POST(request) {
 
 async function addTagToDatabase(tag) {
   return new Promise((resolve, reject) => {
-    db.run(
-      'INSERT INTO tags (name) VALUES (?)',
-      [tag],
-      function (err) {
-        if (err) {
-          console.error('Ошибка при добавлении тега в базу данных:', err);
-          reject(err);
-        } else {
-          console.log(`Тег "${tag}" успешно добавлен в базу данных`);
-          resolve();
-        }
+    db.run('INSERT INTO tags (name) VALUES (?)', [tag], function (err) {
+      if (err) {
+        console.error('Ошибка при добавлении тега в базу данных:', err);
+        reject(err);
+      } else {
+        console.log(`Тег "${tag}" успешно добавлен в базу данных`);
+        resolve();
       }
-    );
+    });
   });
 }

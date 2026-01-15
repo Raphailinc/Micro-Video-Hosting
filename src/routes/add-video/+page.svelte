@@ -23,7 +23,7 @@
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
-    selectedTags.forEach(tag => formData.append('tags[]', tag));
+    selectedTags.forEach((tag) => formData.append('tags[]', tag));
     formData.append('video_file', videoFile);
 
     try {
@@ -34,7 +34,7 @@
 
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
-        body: formData
+        body: formData,
       });
 
       if (!response.ok) {
@@ -57,7 +57,7 @@
       selectedTags = [];
     }
     if (selectedTags.includes(tag)) {
-      selectedTags = selectedTags.filter(t => t !== tag);
+      selectedTags = selectedTags.filter((t) => t !== tag);
     } else {
       selectedTags = [...selectedTags, tag];
     }
@@ -87,15 +87,16 @@
       const allTagsData = await responseAllTags.json();
       const allTags = allTagsData.tags || [];
 
-      availableTags = allTags.map(tag => ({
-        name: tag,
-        selected: Array.isArray(videoTags) && videoTags.includes(tag)
-      })).map(tagObj => tagObj.name);
+      availableTags = allTags
+        .map((tag) => ({
+          name: tag,
+          selected: Array.isArray(videoTags) && videoTags.includes(tag),
+        }))
+        .map((tagObj) => tagObj.name);
     } catch (error) {
       console.error('Ошибка при загрузке выбранного видео:', error);
     }
   };
-
 
   onMount(async () => {
     if (initialTags.length) {
@@ -127,10 +128,13 @@
   }
 
   if (typeof document !== 'undefined') {
-    document.title = "Добавить/Редактировать видео - Микровидеохостинг";
+    document.title = 'Добавить/Редактировать видео - Микровидеохостинг';
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute("content", "Добавление или редактирование видео на Микровидеохостинг.");
+      metaDescription.setAttribute(
+        'content',
+        'Добавление или редактирование видео на Микровидеохостинг.'
+      );
     }
   }
 </script>
@@ -142,64 +146,105 @@
     <label class="label" for="modeToggle">Режим:</label>
     <div class="control">
       <label class="radio" for="editingMode">
-        <input type="radio" id="editingMode" checked={isEditing} on:change={handleModeChange} />
+        <input
+          type="radio"
+          id="editingMode"
+          checked={isEditing}
+          on:change={handleModeChange}
+        />
         Редактирование
       </label>
       <label class="radio" for="addingMode">
-        <input type="radio" id="addingMode" checked={!isEditing} on:change={handleModeChange} />
+        <input
+          type="radio"
+          id="addingMode"
+          checked={!isEditing}
+          on:change={handleModeChange}
+        />
         Добавление
       </label>
     </div>
   </div>
 
-  <form on:submit|preventDefault={handleSubmit} class="box" enctype="multipart/form-data">
+  <form
+    on:submit|preventDefault={handleSubmit}
+    class="box"
+    enctype="multipart/form-data"
+  >
     {#if isEditing}
-    <div class="field">
-      <label class="label" for="videoSelect">Выберите видео для редактирования:</label>
-      <div class="control">
-        <select id="videoSelect" bind:value={selectedVideoId}>
-          {#each availableVideos as video}
-            <option value={video.id}>{video.title}</option>
-          {/each}
-        </select>
+      <div class="field">
+        <label class="label" for="videoSelect"
+          >Выберите видео для редактирования:</label
+        >
+        <div class="control">
+          <select id="videoSelect" bind:value={selectedVideoId}>
+            {#each availableVideos as video}
+              <option value={video.id}>{video.title}</option>
+            {/each}
+          </select>
+        </div>
       </div>
-    </div>
     {/if}
 
     <div class="field">
       <label for="title" class="label">Название:</label>
       <div class="control">
-        <input type="text" id="title" bind:value={title} class="input" required />
+        <input
+          type="text"
+          id="title"
+          bind:value={title}
+          class="input"
+          required
+        />
       </div>
     </div>
     <div class="field">
       <label for="description" class="label">Описание:</label>
       <div class="control">
-        <textarea id="description" bind:value={description} class="textarea"></textarea>
+        <textarea id="description" bind:value={description} class="textarea" />
       </div>
     </div>
     <div class="field">
       <label for="tags" class="label">Теги:</label>
       <div class="control">
-        <div id="tags" role="group" aria-labelledby="tags" class="checkbox-group">
+        <div
+          id="tags"
+          role="group"
+          aria-labelledby="tags"
+          class="checkbox-group"
+        >
           {#each availableTags as tag}
             <label>
-              <input type="checkbox" on:change={() => handleTagChange(tag)} value={tag} class="mr-2" checked={selectedTags.includes(tag)} />
+              <input
+                type="checkbox"
+                on:change={() => handleTagChange(tag)}
+                value={tag}
+                class="mr-2"
+                checked={selectedTags.includes(tag)}
+              />
               {tag}
             </label>
           {/each}
         </div>
       </div>
-    </div>        
+    </div>
     <div class="field">
       <label for="videoFile" class="label">Видеофайл:</label>
       <div class="control">
-        <input type="file" id="videoFile" on:change={handleFileChange} accept="video/*" class="input" />
+        <input
+          type="file"
+          id="videoFile"
+          on:change={handleFileChange}
+          accept="video/*"
+          class="input"
+        />
       </div>
     </div>
     <div class="field">
       <div class="control">
-        <button type="submit" class="button is-primary">{isEditing ? 'Сохранить' : 'Добавить'}</button>
+        <button type="submit" class="button is-primary"
+          >{isEditing ? 'Сохранить' : 'Добавить'}</button
+        >
       </div>
     </div>
   </form>

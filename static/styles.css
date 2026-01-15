@@ -1,174 +1,174 @@
 body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
+  font-family: Arial, sans-serif;
+  padding: 20px;
 }
 
 .page-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 .video-card,
 .card {
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 20px;
-    box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
 }
 
 .video-card.selected,
 .tag-card.selected {
-    background-color: lightblue;
+  background-color: lightblue;
 }
 
 .video-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    flex: 0 0 auto;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  flex: 0 0 auto;
 }
 
 .video-description {
-    margin-top: 10px;
-    flex: 1;
+  margin-top: 10px;
+  flex: 1;
 }
 
 .tag-list {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 .tag-list li {
-    display: inline-block;
-    margin-right: 10px;
-    background-color: #007bff;
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 5px;
+  display: inline-block;
+  margin-right: 10px;
+  background-color: #007bff;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
 }
 
 .video-grid,
 .video-row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-    margin-top: 50px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  margin-top: 50px;
 }
 
 .video-card,
 .video {
-    width: 30%;
-    margin-right: 2%;
+  width: 30%;
+  margin-right: 2%;
 }
 
 .pagination {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 .pagination button {
-    margin-right: 10px;
-    transition: background-color 0.3s ease;
+  margin-right: 10px;
+  transition: background-color 0.3s ease;
 }
 
 .pagination button:hover {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 .container {
-    padding: 10px;
+  padding: 10px;
 }
 
 .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .tag-card {
-    display: flex;
-    align-items: center;
-    padding: 5px 10px;
-    background-color: #f0f0f0;
-    border-radius: 5px;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .tag {
-    margin-right: 5px;
-    font-size: 14px;
+  margin-right: 5px;
+  font-size: 14px;
 }
 
 .add-btn {
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    padding: 10px 20px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .add-btn:hover {
-    background-color: #45a049;
-    transform: scale(1.1);
+  background-color: #45a049;
+  transform: scale(1.1);
 }
 
 .title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .content {
-    padding: 15px;
+  padding: 15px;
 }
 
 .video {
-    position: relative;
-    padding-bottom: 56.25%;
-    background-color: #f2f2f2;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s ease;
+  position: relative;
+  padding-bottom: 56.25%;
+  background-color: #f2f2f2;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
 .video:hover {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .thumbnail {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
-    object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
 .video-info {
-    padding: 10px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+  padding: 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .video-card:hover,
 .video:hover {
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
 }
 
 .tag-card:hover {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }

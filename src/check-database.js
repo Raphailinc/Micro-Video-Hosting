@@ -13,6 +13,8 @@ export async function isDatabaseEmpty() {
 // simple check when run directly
 if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
   isDatabaseEmpty()
-    .then((isEmpty) => console.log(isEmpty ? 'База данных пуста.' : 'База данных не пуста.'))
+    .then((isEmpty) =>
+      console.log(isEmpty ? 'База данных пуста.' : 'База данных не пуста.')
+    )
     .catch((err) => console.error(err));
 }

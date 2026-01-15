@@ -57,10 +57,7 @@ export async function PUT(request) {
       await addVideoTag(id, tagId);
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200 }
-    );
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
     console.error('Ошибка при обработке PUT запроса:', error);
     return new Response(
@@ -83,14 +80,20 @@ async function getTagId(tag) {
 
 async function addVideoTag(videoId, tagId) {
   await new Promise((resolve, reject) => {
-    db.run('INSERT INTO video_tags (video_id, tag_id) VALUES (?, ?)', [videoId, tagId], function(err) {
-      if (err) {
-        reject(err);
-      } else {
-        console.log(`Связь между видео ${videoId} и тегом ${tagId} успешно добавлена`);
-        resolve();
+    db.run(
+      'INSERT INTO video_tags (video_id, tag_id) VALUES (?, ?)',
+      [videoId, tagId],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          console.log(
+            `Связь между видео ${videoId} и тегом ${tagId} успешно добавлена`
+          );
+          resolve();
+        }
       }
-    });
+    );
   });
 }
 

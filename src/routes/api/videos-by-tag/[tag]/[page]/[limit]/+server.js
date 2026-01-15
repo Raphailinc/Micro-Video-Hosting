@@ -1,4 +1,4 @@
-import { dbAll, dbGet } from '../../../../../database.js';
+import { dbAll, dbGet } from '../../../../../../database.js';
 
 export async function GET({ params }) {
   const { tag, page, limit } = params;
@@ -33,7 +33,7 @@ export async function GET({ params }) {
     console.error('Ошибка при получении видео по тегу:', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 }

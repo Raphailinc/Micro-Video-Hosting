@@ -6,7 +6,7 @@ export async function load({ params }) {
   return {
     props: {
       id,
-      BASE_URL: process.env.BASE_URL || ''
-    }
+      BASE_URL: process.env.BASE_URL || '',
+    },
   };
 }

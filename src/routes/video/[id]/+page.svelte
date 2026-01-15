@@ -22,7 +22,6 @@
       video = getData;
       tags = getData.tags;
       setPageTitle();
-      
     } catch (error) {
       console.error('Ошибка при загрузке видео:', error);
       goto('/');
@@ -33,9 +32,14 @@
     pageTitle = `${video.title} - Микровидеохостинг`;
     if (typeof document !== 'undefined') {
       document.title = pageTitle;
-      const metaDescription = document.querySelector('meta[name="description"]');
+      const metaDescription = document.querySelector(
+        'meta[name="description"]'
+      );
       if (metaDescription) {
-        metaDescription.setAttribute("content", `${video.description} на Микровидеохостинг.`);
+        metaDescription.setAttribute(
+          'content',
+          `${video.description} на Микровидеохостинг.`
+        );
       }
     }
   };
@@ -46,12 +50,12 @@
 
   BASE_URL = data.props.BASE_URL;
 </script>
-  
+
 {#if Object.keys(video).length > 0}
   <div>
     <video controls>
-      <source src="{BASE_URL}/videos/{video.video_file}" type="video/mp4">
-      <track kind="captions" src="captions.vtt" srclang="en" label="English">
+      <source src="{BASE_URL}/videos/{video.video_file}" type="video/mp4" />
+      <track kind="captions" src="captions.vtt" srclang="en" label="English" />
       Нет доступного видео.
     </video>
     <div>

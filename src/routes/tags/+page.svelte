@@ -23,7 +23,9 @@
   };
 
   const filterTags = () => {
-    filteredTags = tags.filter(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    filteredTags = tags.filter((tag) =>
+      tag.toLowerCase().includes(searchQuery.toLowerCase())
+    );
     if (selectedTagIndex >= filteredTags.length) {
       selectedTagIndex = filteredTags.length - 1;
     }
@@ -36,9 +38,9 @@
         const response = await fetch('/api/add-tag', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ tag: newTag })
+          body: JSON.stringify({ tag: newTag }),
         });
         if (!response.ok) {
           throw new Error('Ошибка при добавлении тега');
@@ -82,10 +84,13 @@
   onMount(fetchTags);
 
   if (typeof document !== 'undefined') {
-    document.title = "Список тегов - Микровидеохостинг";
+    document.title = 'Список тегов - Микровидеохостинг';
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute("content", "Список тегов на Микровидеохостинг.");
+      metaDescription.setAttribute(
+        'content',
+        'Список тегов на Микровидеохостинг.'
+      );
     }
   }
 </script>
@@ -93,11 +98,21 @@
 <div class="container" role="listbox" tabindex="0" on:keydown={handleKeyDown}>
   <h1 class="title">Список тегов</h1>
 
-  <input type="text" placeholder="Поиск тегов..." bind:value={searchQuery} on:input={filterTags}>
+  <input
+    type="text"
+    placeholder="Поиск тегов..."
+    bind:value={searchQuery}
+    on:input={filterTags}
+  />
 
   <div class="tags">
     {#each filteredTags as tag, index}
-      <div class="tag-card" class:selected={index === selectedTagIndex} on:click={() => handleClickTag(tag)} on:keydown={(event) => event.key === 'Enter' && handleClickTag(tag)}>
+      <div
+        class="tag-card"
+        class:selected={index === selectedTagIndex}
+        on:click={() => handleClickTag(tag)}
+        on:keydown={(event) => event.key === 'Enter' && handleClickTag(tag)}
+      >
         <span class="tag">{tag}</span>
       </div>
     {/each}

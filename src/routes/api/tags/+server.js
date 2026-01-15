@@ -5,20 +5,20 @@ export async function GET() {
     const videoTags = await getVideoTags();
     const tagsFromTagsTable = await getTagsFromTagsTable();
     const allTags = [...new Set([...videoTags, ...tagsFromTagsTable])];
-    
+
     return new Response(JSON.stringify({ tags: allTags }), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
   } catch (error) {
     console.error('Ошибка при запросе тегов:', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
   }
 }
@@ -26,10 +26,10 @@ export async function GET() {
 async function getVideoTags() {
   const rows = await dbAll('SELECT tags FROM videos');
   const tags = [];
-  rows.forEach(row => {
+  rows.forEach((row) => {
     if (row.tags) {
       const videoTags = row.tags.split(',');
-      videoTags.forEach(tag => {
+      videoTags.forEach((tag) => {
         if (!tags.includes(tag.trim())) {
           tags.push(tag.trim());
         }
@@ -41,5 +41,5 @@ async function getVideoTags() {
 
 async function getTagsFromTagsTable() {
   const rows = await dbAll('SELECT name FROM tags');
-  return rows.map(row => row.name.trim());
+  return rows.map((row) => row.name.trim());
 }

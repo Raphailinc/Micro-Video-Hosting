@@ -1,9 +1,9 @@
 <nav class="navbar is-dark" aria-label="main navigation">
   <div class="navbar-brand">
     <div class="navbar-burger burger" aria-label="menu" aria-expanded="false">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
+      <span aria-hidden="true" />
+      <span aria-hidden="true" />
+      <span aria-hidden="true" />
     </div>
   </div>
   <div class="navbar-menu">
@@ -15,7 +15,7 @@
   </div>
 </nav>
 
-<slot/>
+<slot />
 
 <style>
   @import '/static/styles.css';
