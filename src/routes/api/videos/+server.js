@@ -1,6 +1,6 @@
 import { dbAll } from '../../../database.js';
 
-export async function GET(request) {
+export async function GET() {
     try {
         const videos = await getAllVideosWithTags();
         return new Response(JSON.stringify(videos), {
