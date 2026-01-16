@@ -542,18 +542,3 @@ describe('API routes', () => {
     spy.mockRestore();
   });
 });
-
-async function createVideoWithTags({
-  title = 'Test',
-  description = 'Desc',
-  tags = ['tag'],
-  file = 'demo.mp4',
-} = {}) {
-  const id = await insertVideo({
-    title,
-    description,
-    video_file: file,
-  });
-  await replaceVideoTags(id, tags);
-  return id;
-}
