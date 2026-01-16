@@ -16,6 +16,12 @@ const config = {
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
+      include: [
+        'src/lib/server/**/*.js',
+        'src/routes/api/**/*.js',
+        'src/database.js',
+      ],
+      exclude: ['**/node_modules/**'],
     },
   },
 };

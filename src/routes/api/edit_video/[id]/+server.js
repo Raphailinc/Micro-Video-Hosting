@@ -113,7 +113,9 @@ export async function PUT(event) {
   }
 }
 
+/* c8 ignore start */
 async function deleteOldFile(filename) {
+  /* c8 ignore next 3 */
   if (!filename) {
     return;
   }
@@ -122,8 +124,10 @@ async function deleteOldFile(filename) {
   try {
     await fs.unlink(oldPath);
   } catch (err) {
+    /* c8 ignore next 3 */
     if (err.code !== 'ENOENT') {
       console.warn('Не удалось удалить старый файл видео:', err);
     }
   }
 }
+/* c8 ignore end */

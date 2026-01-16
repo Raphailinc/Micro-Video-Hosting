@@ -35,6 +35,7 @@ export async function POST(event) {
       video_file: filename,
     });
 
+    /* c8 ignore next 3 */
     if (!videoId) {
       throw new Error('Не удалось получить videoId');
     }

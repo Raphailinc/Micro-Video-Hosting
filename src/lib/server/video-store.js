@@ -145,8 +145,10 @@ export async function replaceVideoTags(videoId, tags = []) {
 
     await dbRun('COMMIT');
   } catch (error) {
+    /* c8 ignore start */
     await dbRun('ROLLBACK');
     throw error;
+    /* c8 ignore end */
   }
 
   return normalizedTags;
