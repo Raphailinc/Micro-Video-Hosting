@@ -1,4 +1,5 @@
 ![CI](https://github.com/Raphailinc/Micro-Video-Hosting/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://raw.githubusercontent.com/Raphailinc/Micro-Video-Hosting/main/badges/coverage.svg)
 
 # Micro Video Hosting (SvelteKit + SQLite)
 
