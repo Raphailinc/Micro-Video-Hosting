@@ -1,17 +1,18 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { requireAuth } from '$lib/server/auth.js';
-import { HttpError, errorResponse } from '$lib/server/http-error.js';
+import { requireAuth } from '#lib/server/auth.js';
+import { HttpError, errorResponse } from '#lib/server/http-error.js';
 import {
   getVideoById,
   normalizeTags,
   replaceVideoTags,
   updateVideo,
-} from '$lib/server/video-store.js';
+} from '#lib/server/video-store.js';
 import {
   UPLOAD_DIR,
+  isUploadedFile,
   validateAndPersistFile,
-} from '$lib/server/uploads.js';
+} from '#lib/server/uploads.js';
 
 export async function PUT(event) {
   const { id } = event.params;
@@ -76,10 +77,9 @@ export async function PUT(event) {
     }
 
     let newFileName;
-    if (videoFile instanceof File && videoFile.size) {
+    if (isUploadedFile(videoFile) && videoFile.size) {
       const saved = await validateAndPersistFile(videoFile);
       newFileName = saved.filename;
-      await deleteOldFile(existingVideo.video_file);
     }
 
     const updateFields = {};
@@ -99,6 +99,10 @@ export async function PUT(event) {
 
     if (shouldUpdateTags) {
       await replaceVideoTags(id, tags ?? []);
+    }
+
+    if (newFileName) {
+      await deleteOldFile(existingVideo.video_file);
     }
 
     const updatedVideo = await getVideoById(id);

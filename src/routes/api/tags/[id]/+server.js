@@ -1,7 +1,7 @@
 import {
   fetchTagsForVideo,
   getVideoById,
-} from '$lib/server/video-store.js';
+} from '#lib/server/video-store.js';
 
 export async function GET({ params }) {
   try {

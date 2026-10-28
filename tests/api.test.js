@@ -1,7 +1,9 @@
+// @vitest-environment node
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
-import { FormData, File, Request } from 'undici';
+import { FormData, Request } from 'undici';
+import { File } from 'node:buffer';
 import {
   beforeAll,
   afterAll,
@@ -12,9 +14,10 @@ import {
   vi,
 } from 'vitest';
 
-globalThis.FormData = FormData;
-globalThis.File = File;
-globalThis.Request = Request;
+
+// Minimal container signatures exercise detection without shipping large media.
+const MP4 = Buffer.from('000000186674797069736f6d0000000069736f6d6d703432', 'hex');
+const WEBM = Buffer.from('1a45dfa3874282847765626d', 'hex');
 
 const TEST_DIR = path.join(os.tmpdir(), 'micro-video-hosting-tests');
 process.env.DATABASE_FILE = path.join(TEST_DIR, 'test.db');
@@ -130,6 +133,17 @@ describe('API routes', () => {
     expect(files).toHaveLength(0);
   }, 10000);
 
+  it('rejects forged video MIME types without a container signature', async () => {
+    const formData = new FormData();
+    formData.append('title', 'Forged upload');
+    formData.append('video_file', new File(['<html>not a video</html>'], 'fake.mp4', { type: 'video/mp4' }));
+    const response = await addVideoRoute.POST({
+      request: { headers: new Headers(), formData: async () => formData },
+    });
+    expect(response.status).toBe(415);
+    expect(await fs.readdir(process.env.UPLOAD_DIR)).toHaveLength(0);
+  });
+
   it('rejects oversized uploads with 413', async () => {
     process.env.MAX_UPLOAD_BYTES = '10';
     const formData = new FormData();
@@ -198,7 +212,7 @@ describe('API routes', () => {
     formData.append('tags[]', 'Tag1'); // dedupe + normalize
     formData.append(
       'video_file',
-      new File([Buffer.from('mp4')], 'clip.mp4', { type: 'video/mp4' })
+      new File([MP4], 'clip.mp4', { type: 'video/mp4' })
     );
 
     const response = await addVideoRoute.POST({
@@ -246,7 +260,7 @@ describe('API routes', () => {
     formData.append('title', 'Has file');
     formData.append(
       'video_file',
-      new File([Buffer.from('newdata')], 'new.webm', { type: 'video/webm' })
+      new File([WEBM], 'new.webm', { type: 'video/webm' })
     );
 
     const response = await editVideoRoute.PUT({
@@ -335,11 +349,11 @@ describe('API routes', () => {
 
   it('persists allowed uploads via validateAndPersistFile', async () => {
     const saved = await uploads.validateAndPersistFile(
-      new File([Buffer.from('video')], 'ok.mp4', { type: 'video/mp4' })
+      new File([MP4], 'ok.mp4', { type: 'video/mp4' })
     );
     expect(saved.filename).toMatch(/\.mp4$/);
-    const exists = await fs.readFile(saved.fullPath, 'utf8');
-    expect(exists).toBe('video');
+    const exists = await fs.readFile(saved.fullPath);
+    expect(exists).toEqual(MP4);
   });
 
   it('validates uploads against detected mime and presence', async () => {

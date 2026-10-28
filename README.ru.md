@@ -60,3 +60,7 @@ pnpm preview
 - Линт/формат: `npm run lint`, `npm run format`
 - Тесты: `npm test` (Vitest, jsdom)
 - CI: GitHub Actions (`ci.yml`) — lint + tests on Node 18.
+
+Требуется Node.js 22.17+; зависимости устанавливаются через `npm ci` с сохранённым lockfile.
+
+Проект обновлён до SvelteKit 3, Svelte 5, Vite 8 и Vitest 5. Настройки находятся в `vite.config.js`, а `#lib` задан через subpath imports в `package.json`. API-тесты выполняются в Node, интерфейсные — в jsdom. Загрузка проверяет сигнатуру контейнера и отклоняет поддельный Content-Type; компактные тестовые файлы проверяют определение формата, а не воспроизведение видео.

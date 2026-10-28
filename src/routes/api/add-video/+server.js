@@ -1,12 +1,12 @@
-import { requireAuth } from '$lib/server/auth.js';
-import { HttpError, errorResponse } from '$lib/server/http-error.js';
+import { requireAuth } from '#lib/server/auth.js';
+import { HttpError, errorResponse } from '#lib/server/http-error.js';
 import {
   fetchTags,
   insertVideo,
   normalizeTags,
   replaceVideoTags,
-} from '$lib/server/video-store.js';
-import { validateAndPersistFile } from '$lib/server/uploads.js';
+} from '#lib/server/video-store.js';
+import { validateAndPersistFile } from '#lib/server/uploads.js';
 
 export async function POST(event) {
   try {
@@ -21,10 +21,6 @@ export async function POST(event) {
 
     if (!title) {
       throw new HttpError(400, 'Пожалуйста, укажите название видео.');
-    }
-
-    if (!(videoFile instanceof File)) {
-      throw new HttpError(400, 'Видеофайл не был загружен.');
     }
 
     const { filename } = await validateAndPersistFile(videoFile);

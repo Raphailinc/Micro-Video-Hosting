@@ -109,6 +109,9 @@
     {#each filteredTags as tag, index}
       <div
         class="tag-card"
+        role="option"
+        tabindex="0"
+        aria-selected={index === selectedTagIndex}
         class:selected={index === selectedTagIndex}
         on:click={() => handleClickTag(tag)}
         on:keydown={(event) => event.key === 'Enter' && handleClickTag(tag)}

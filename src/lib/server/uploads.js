@@ -24,8 +24,14 @@ export function allowedMimeTypes() {
   return Array.from(ALLOWED_MIME_TO_EXT.keys());
 }
 
+export function isUploadedFile(file) {
+  // File objects can originate from a different Web API realm or runtime.
+  return file !== null && typeof file === 'object' &&
+    typeof file.arrayBuffer === 'function' && typeof file.size === 'number';
+}
+
 export async function validateAndPersistFile(file) {
-  if (!file || typeof file.arrayBuffer !== 'function') {
+  if (!isUploadedFile(file)) {
     throw new HttpError(400, 'Видеофайл не был загружен.');
   }
 
@@ -38,7 +44,12 @@ export async function validateAndPersistFile(file) {
   const buffer = Buffer.isBuffer(arrayBuffer)
     ? arrayBuffer
     : Buffer.from(arrayBuffer);
-  const detectedType = await fileTypeFromBuffer(new Uint8Array(buffer));
+  let detectedType;
+  try {
+    detectedType = await fileTypeFromBuffer(new Uint8Array(buffer));
+  } catch {
+    throw new HttpError(415, 'Не удалось определить формат медиа.');
+  }
   const extension = resolveExtension(file.type, detectedType?.mime);
 
   if (!extension) {
@@ -81,5 +92,6 @@ function resolveExtension(declaredType, detectedType) {
   }
   /* c8 ignore end */
 
-  return declaredExt ?? null;
+  // A supplied Content-Type alone is not evidence that bytes contain video.
+  return null;
 }

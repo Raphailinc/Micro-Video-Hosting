@@ -1,4 +1,4 @@
-import { fetchVideosWithTags } from '$lib/server/video-store.js';
+import { fetchVideosWithTags } from '#lib/server/video-store.js';
 
 export async function GET() {
   try {

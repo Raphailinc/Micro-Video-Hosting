@@ -254,7 +254,7 @@
     <div class="field">
       <label for="description" class="label">Описание:</label>
       <div class="control">
-        <textarea id="description" bind:value={description} class="textarea" />
+        <textarea id="description" bind:value={description} class="textarea"></textarea>
       </div>
     </div>
     <div class="field">

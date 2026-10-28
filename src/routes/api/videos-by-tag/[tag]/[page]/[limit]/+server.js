@@ -1,8 +1,8 @@
 import {
   countVideosByTag,
   fetchVideosWithTags,
-} from '$lib/server/video-store.js';
-import { HttpError, errorResponse } from '$lib/server/http-error.js';
+} from '#lib/server/video-store.js';
+import { HttpError, errorResponse } from '#lib/server/http-error.js';
 
 export async function GET({ params }) {
   const { tag, page, limit } = params;

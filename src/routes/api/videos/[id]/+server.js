@@ -1,4 +1,4 @@
-import { getVideoById } from '$lib/server/video-store.js';
+import { getVideoById } from '#lib/server/video-store.js';
 
 export async function GET({ params }) {
   const { id } = params;

@@ -1,12 +1,17 @@
+<script>
+  let menuOpen = false;
+</script>
+
 <nav class="navbar is-dark" aria-label="main navigation">
   <div class="navbar-brand">
-    <div class="navbar-burger burger" aria-label="menu" aria-expanded="false">
-      <span aria-hidden="true" />
-      <span aria-hidden="true" />
-      <span aria-hidden="true" />
-    </div>
+    <button type="button" class="navbar-burger burger" class:is-active={menuOpen}
+      aria-label="Меню" aria-expanded={menuOpen} on:click={() => (menuOpen = !menuOpen)}>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
   </div>
-  <div class="navbar-menu">
+  <div class="navbar-menu" class:is-active={menuOpen}>
     <div class="navbar-start">
       <a href="/" class="navbar-item">Главная</a>
       <a href="/tags" class="navbar-item">Теги</a>

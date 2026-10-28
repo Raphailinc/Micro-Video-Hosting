@@ -1,6 +1,6 @@
 import { dbRun } from '../../../database.js';
-import { requireAuth } from '$lib/server/auth.js';
-import { errorResponse, HttpError } from '$lib/server/http-error.js';
+import { requireAuth } from '#lib/server/auth.js';
+import { errorResponse, HttpError } from '#lib/server/http-error.js';
 
 export async function POST(event) {
   try {
