@@ -1,66 +1,34 @@
-![CI](https://github.com/Raphailinc/Micro-Video-Hosting/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://raw.githubusercontent.com/Raphailinc/Micro-Video-Hosting/main/badges/coverage.svg)
+# Micro Video Hosting
 
-# Micro Video Hosting (SvelteKit + SQLite)
+[![CI](https://github.com/Raphailinc/Micro-Video-Hosting/actions/workflows/ci.yml/badge.svg)](https://github.com/Raphailinc/Micro-Video-Hosting/actions/workflows/ci.yml)
 
-![Preview](docs/mvh.svg)
+[English](README.md) · [Русский](README.ru.md)
 
-Мини-хостинг видео на SvelteKit/SQLite: загрузка роликов, теги, просмотр и фильтр по тегам. API на file-based endpoints, хранение в `mydatabase.db`, загрузка файлов в `static/videos`.
+Небольшой fullstack-проект загрузки и просмотра видео с навигацией по тегам.
 
-## Запуск
+## Возможности
+
+- Загрузка видеофайлов и метаданных.
+- Хранение записей и тегов в SQLite.
+- Страница видео и API тегов с пагинацией.
+- Тесты API и поведения страниц через Vitest.
+
+## Локальный запуск
 
 ```bash
-pnpm install   # или npm/yarn
+npm ci
 cp .env.example .env
-pnpm dev
+npm run dev
 ```
 
-По умолчанию база `mydatabase.db` создаётся рядом с проектом. Видео складываются в `static/videos`.
-
-## API/функционал
-
-- `POST /api/add-video` — загрузка видео (FormData: `title`, `description`, `tags[]`, `video_file`).
-- `GET /api/videos` — все видео с тегами.
-- `GET /api/videos/:id` — карточка с тегами.
-- `GET /api/videos-by-tag/:tag/:page/:limit` — пагинация по тегу.
-- `GET /api/tags` — список всех тегов.
-- `GET /api/home` — последние 6 видео.
-
-### Примеры
+## Проверки
 
 ```bash
-# создать ролик
-curl -F "title=Demo" -F "description=short" -F "tags[]=nasa" -F "video_file=@demo.mp4" \
-  http://localhost:5173/api/add-video
-
-# список роликов и конкретный id
-curl http://localhost:5173/api/videos
-curl http://localhost:5173/api/videos/1
-
-# ролики по тегу
-curl http://localhost:5173/api/videos-by-tag/nasa/1/10
+npm test
+npm run lint
+npm run build
 ```
 
-## Разработчику
+## Условия запуска и границы проекта
 
-- База и таблицы создаются автоматически при старте.
-- Настрой `BASE_URL` в `.env` для отдачи файлов (используется на страницах просмотра).
-- Тесты: Vitest + @testing-library/svelte (`npm test`) покрывают домашнюю страницу загрузки.
-- Линт: ESLint + Prettier (`npm run lint`, `npm run format`).
-
-## Билд
-
-```bash
-pnpm build
-pnpm preview
-```
-
-## Quality
-
-- Линт/формат: `npm run lint`, `npm run format`
-- Тесты: `npm test` (Vitest, jsdom)
-- CI: GitHub Actions (`ci.yml`) — lint + tests on Node 18.
-
-Требуется Node.js 22.17+; зависимости устанавливаются через `npm ci` с сохранённым lockfile.
-
-Проект обновлён до SvelteKit 3, Svelte 5, Vite 8 и Vitest 5. Настройки находятся в `vite.config.js`, а `#lib` задан через subpath imports в `package.json`. API-тесты выполняются в Node, интерфейсные — в jsdom. Загрузка проверяет сигнатуру контейнера и отклоняет поддельный Content-Type; компактные тестовые файлы проверяют определение формата, а не воспроизведение видео.
+Нужен Node.js 22.17+. Интерфейс: http://localhost:5173. SvelteKit 3, Svelte 5, Vite 8, Vitest 5; конфигурация — vite.config.js, #lib задаётся через package imports. Медиафайлы хранятся на диске. В разработке аутентификация API выключена: перед общим доступом настройте REQUIRE_AUTH, API_TOKEN, лимиты загрузок и постоянное хранилище. Проверяется сигнатура видеоконтейнера; поддельный Content-Type отклоняется. Бинарные тестовые образцы проверяют распознавание формата, а не воспроизведение видео. SVG в docs — иллюстрация интерфейса.
