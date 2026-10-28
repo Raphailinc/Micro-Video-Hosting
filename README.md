@@ -1,62 +1,34 @@
-![CI](https://github.com/Raphailinc/Micro-Video-Hosting/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://raw.githubusercontent.com/Raphailinc/Micro-Video-Hosting/main/badges/coverage.svg)
+# Micro Video Hosting
 
-# Micro Video Hosting (SvelteKit + SQLite)
+[![CI](https://github.com/Raphailinc/Micro-Video-Hosting/actions/workflows/ci.yml/badge.svg)](https://github.com/Raphailinc/Micro-Video-Hosting/actions/workflows/ci.yml)
 
-![Preview](docs/mvh.svg)
+[English](README.md) · [Русский](README.ru.md)
 
-Мини-хостинг видео на SvelteKit/SQLite: загрузка роликов, теги, просмотр и фильтр по тегам. API на file-based endpoints, хранение в `mydatabase.db`, загрузка файлов в `static/videos`.
+A small full-stack project for uploading and browsing videos with tag-based navigation.
 
-## Запуск
+## What it does
+
+- Upload video metadata and media files.
+- Store records and tags in SQLite.
+- Browse a video detail page or query paginated tag endpoints.
+- Run Vitest checks for API helpers and page behavior.
+
+## Run locally
 
 ```bash
-pnpm install   # или npm/yarn
+npm ci
 cp .env.example .env
-pnpm dev
+npm run dev
 ```
 
-По умолчанию база `mydatabase.db` создаётся рядом с проектом. Видео складываются в `static/videos`.
-
-## API/функционал
-
-- `POST /api/add-video` — загрузка видео (FormData: `title`, `description`, `tags[]`, `video_file`).
-- `GET /api/videos` — все видео с тегами.
-- `GET /api/videos/:id` — карточка с тегами.
-- `GET /api/videos-by-tag/:tag/:page/:limit` — пагинация по тегу.
-- `GET /api/tags` — список всех тегов.
-- `GET /api/home` — последние 6 видео.
-
-### Примеры
+## Checks
 
 ```bash
-# создать ролик
-curl -F "title=Demo" -F "description=short" -F "tags[]=nasa" -F "video_file=@demo.mp4" \
-  http://localhost:5173/api/add-video
-
-# список роликов и конкретный id
-curl http://localhost:5173/api/videos
-curl http://localhost:5173/api/videos/1
-
-# ролики по тегу
-curl http://localhost:5173/api/videos-by-tag/nasa/1/10
+npm test
+npm run lint
+npm run build
 ```
 
-## Разработчику
+## Scope and implementation notes
 
-- База и таблицы создаются автоматически при старте.
-- Настрой `BASE_URL` в `.env` для отдачи файлов (используется на страницах просмотра).
-- Тесты: Vitest + @testing-library/svelte (`npm test`) покрывают домашнюю страницу загрузки.
-- Линт: ESLint + Prettier (`npm run lint`, `npm run format`).
-
-## Билд
-
-```bash
-pnpm build
-pnpm preview
-```
-
-## Quality
-
-- Линт/формат: `npm run lint`, `npm run format`
-- Тесты: `npm test` (Vitest, jsdom)
-- CI: GitHub Actions (`ci.yml`) — lint + tests on Node 18.
+Local UI: `http://localhost:5173`. Media is stored on local disk. Development configuration disables API authentication; review `REQUIRE_AUTH`, `API_TOKEN`, upload limits and persistent storage before sharing an instance. The SVG preview is a UI illustration.
